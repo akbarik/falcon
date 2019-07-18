@@ -23,14 +23,24 @@ import { Filters } from './Filters';
 
 const copy = item => item && JSON.parse(JSON.stringify(item));
 
+// if product's category is in filters, use that as a value for categoryId parameter of CategoryProductsQuery
+const getId = (id, filters) => {
+  let resultId = id;
+  const category = filters.find(item => item.field === 'cat');
+  if (category && category.value) {
+    resultId = Array.isArray(category.value) && category.value.length > 0 ? category.value[0] : category.value;
+  }
+  return resultId;
+};
+
 const CategoryPage = ({ id }) => (
   <SearchConsumer>
     {({ state }) => (
       <CategoryProductsQuery
         variables={{
-          categoryId: id,
+          categoryId: getId(id, state.filters),
           sort: state.sort,
-          filters: copy(state.filters)
+          filters: copy(state.filters).filter(item => item.field !== 'cat')
         }}
         passLoading
       >
